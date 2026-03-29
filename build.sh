@@ -29,6 +29,17 @@ for team in $(jq -r 'keys[]' "$CONFIG"); do
     continue
   fi
 
+  # Generate a unique salt per team (deterministic from team slug so rebuilds are consistent)
+  team_salt=$(echo -n "report-salt-$team" | sha256sum | cut -c1-32)
+
+  # Password strength warning (not enforced)
+  if [ ${#password} -lt 12 ]; then
+    echo "WARNING: Password for '$team' is shorter than 12 characters. Consider using a stronger password."
+  fi
+  if echo "$password" | grep -qP '^[a-zA-Z0-9]+$'; then
+    echo "WARNING: Password for '$team' uses only alphanumeric characters. Consider adding symbols (!@#\$%^&*)."
+  fi
+
   mkdir -p "$DIST_DIR/$team"
 
   # Generate a team index page listing all reports (excluding index.html itself)
@@ -110,6 +121,7 @@ INDEXEOF
     echo "Encrypting $team/$out_filename ..."
     "$STATICRYPT" "$html_file" \
       -p "$password" \
+      -s "$team_salt" \
       -d /tmp/staticrypt-out \
       --short \
       -t "$SCRIPT_DIR/custom_template.html" \
