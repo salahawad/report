@@ -28,8 +28,8 @@ Built with [StatiCrypt](https://github.com/robinmoisson/staticrypt).
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18+)
-- [jq](https://jqlang.github.io/jq/) (JSON processor, used by the build script)
 - A GitHub account
+- Works on **Windows**, **macOS**, and **Linux** — no bash or extra tools required
 
 ### 1. Fork or clone this repo
 
@@ -82,7 +82,7 @@ A **test-team** template is included as a reference with all available UI compon
 # First create a minimal teams.json if you haven't yet:
 echo '{"test-team":{"password":"test123","title":"Test Team"}}' > teams.json
 
-bash build.sh
+npm run build
 npx serve dist
 # Open http://localhost:3000/test-team/ → password: test123
 ```
@@ -103,7 +103,7 @@ const teams = [
 ### 6. Build
 
 ```bash
-bash build.sh
+npm run build
 ```
 
 The build script will automatically:
@@ -141,7 +141,7 @@ https://YOUR_USERNAME.github.io/YOUR_REPO/
 1. Create `teams/new-team/*.html` with the report HTML
 2. Add the team to `teams.json` with a password
 3. Add the team to the `teams` array in root `index.html`
-4. Run `bash build.sh`
+4. Run `npm run build`
 5. Commit `dist/` and `index.html`, then push
 
 ## Multiple pages per team
