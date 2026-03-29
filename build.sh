@@ -113,7 +113,7 @@ INDEXEOF
       -d /tmp/staticrypt-out \
       --short \
       -t "$SCRIPT_DIR/custom_template.html" \
-      --template-title "$title" \
+      --template-title "Protected Report" \
       --template-color-primary "#f0a030" \
       --template-color-secondary "#0a0b0e" \
       --template-instructions "Enter your team credentials to access this report." \
