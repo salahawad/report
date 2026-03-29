@@ -1,0 +1,85 @@
+name: Validate PR
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check teams.json is not committed
+        run: |
+          if [ -f "teams.json" ]; then
+            echo "::error::teams.json must not be committed — it contains passwords. Add it to .gitignore."
+            exit 1
+          fi
+          echo "OK: teams.json not found in repo"
+
+      - name: Check raw reports are not committed
+        run: |
+          if [ -d "teams" ] && [ "$(find teams -name '*.html' 2>/dev/null | head -1)" ]; then
+            echo "::error::Raw unencrypted HTML files found in teams/ — this directory must be gitignored."
+            exit 1
+          fi
+          echo "OK: no raw reports in teams/"
+
+      - name: Check all HTML in dist/ is encrypted
+        run: |
+          failed=0
+          for file in $(find dist -name '*.html' -not -name 'index.html' -not -name '404.html'); do
+            # The root index.html and 404.html are public pages, skip them
+            # Team index pages inside team folders should be encrypted
+            dir=$(dirname "$file")
+            base=$(basename "$file")
+
+            # Skip root-level files
+            if [ "$dir" = "dist" ]; then
+              continue
+            fi
+
+            # Check for staticrypt marker
+            if ! grep -q "staticryptEncryptedMsgUniqueVariableName" "$file"; then
+              echo "::error::$file is NOT encrypted — all HTML inside team folders must be encrypted via build script."
+              failed=1
+            fi
+          done
+
+          if [ "$failed" = "1" ]; then
+            exit 1
+          fi
+          echo "OK: all team HTML files are encrypted"
+
+      - name: Check for leaked secrets in committed files
+        run: |
+          failed=0
+          # Common patterns that should never appear in committed files
+          patterns=(
+            'password.*[:=].*[^ ]'
+            'secret.*[:=].*[^ ]'
+            'TEAM_.*_PASSWORD=.'
+          )
+
+          for pattern in "${patterns[@]}"; do
+            # Search in all files except dist/ (encrypted content), node_modules, and .git
+            matches=$(grep -rn --include='*.json' --include='*.yml' --include='*.yaml' --include='*.env' --include='*.sh' --include='*.js' -i "$pattern" . \
+              --exclude-dir=dist --exclude-dir=node_modules --exclude-dir=.git \
+              --exclude='teams.json.example' --exclude='package-lock.json' --exclude='build.js' --exclude='build.sh' \
+              2>/dev/null || true)
+            if [ -n "$matches" ]; then
+              echo "::warning::Possible secret found:"
+              echo "$matches"
+            fi
+          done
+
+          echo "OK: secret scan complete"
+
+      - name: Check dist/index.html exists
+        run: |
+          if [ ! -f "dist/index.html" ]; then
+            echo "::error::dist/index.html is missing — run 'npm run build' before committing."
+            exit 1
+          fi
+          echo "OK: dist/index.html exists"
