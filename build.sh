@@ -41,6 +41,7 @@ for team in $(jq -r 'keys[]' "$CONFIG"); do
       -p "$password" \
       -d "$DIST_DIR/$team" \
       --short \
+      -t "$SCRIPT_DIR/custom_template.html" \
       --template-title "$title" \
       --template-color-primary "#f0a030" \
       --template-color-secondary "#0a0b0e" \
