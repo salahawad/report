@@ -4,9 +4,20 @@ Password-protected HTML reports published via GitHub Pages. Each team gets their
 
 Built with [StatiCrypt](https://github.com/robinmoisson/staticrypt).
 
-## Live
+## Accessing Reports
 
-**https://salahawad.github.io/report/**
+1. Go to **https://salahawad.github.io/report/**
+2. Select your team from the list
+3. Enter the password you were given and click **Decrypt**
+4. "Remember me" is checked by default — your password is saved for 30 days so you won't be prompted again on any page within your team
+5. From the team index you can navigate between all available reports
+
+**Notes:**
+- If you see "Bad password", double-check for typos — passwords are case-sensitive
+- To reset a saved password, clear your browser's localStorage for this site
+- Reports are decrypted locally in your browser — nothing is sent to any server
+
+---
 
 ## Structure
 
