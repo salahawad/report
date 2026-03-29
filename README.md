@@ -4,104 +4,145 @@ Password-protected HTML reports published via GitHub Pages. Each team gets their
 
 Built with [StatiCrypt](https://github.com/robinmoisson/staticrypt).
 
-## Accessing Reports
+---
 
-1. Go to **https://salahawad.github.io/report/**
+## For Report Viewers
+
+1. Go to the reports site (provided by your admin)
 2. Select your team from the list
 3. Enter the password you were given and click **Decrypt**
 4. "Remember me" is checked by default — your password is saved for 30 days so you won't be prompted again on any page within your team
 5. From the team index you can navigate between all available reports
 
-**Notes:**
-- If you see "Bad password", double-check for typos — passwords are case-sensitive
+**Tips:**
+- Passwords are case-sensitive — double-check for typos if you see "Bad password"
 - To reset a saved password, clear your browser's localStorage for this site
-- Reports are decrypted locally in your browser — nothing is sent to any server
+- Everything is decrypted locally in your browser — nothing is sent to any server
 
 ---
 
-## Structure
+## For Admins — Host Your Own
 
-```
-dist/                       ← encrypted output (committed, deployed)
-  index.html                ← public landing page (team selector)
-  <team-slug>/
-    index.html              ← auto-generated report listing (encrypted)
-    full-report.html        ← main report (encrypted)
-    summary.html            ← additional pages (encrypted)
-teams/                      ← raw reports (local only, gitignored)
-  <team-slug>/*.html
-teams.json                  ← team config + passwords (local only, gitignored)
-build.sh                    ← encrypts team pages → dist/
-custom_template.html        ← password prompt template
-```
+### Prerequisites
 
-## Quick start
+- [Node.js](https://nodejs.org/) (v18+)
+- [jq](https://jqlang.github.io/jq/) (JSON processor, used by the build script)
+- A GitHub account
+
+### 1. Fork or clone this repo
 
 ```bash
+# Option A: Fork on GitHub, then clone your fork
+git clone https://github.com/YOUR_USERNAME/report.git
+
+# Option B: Clone and set your own remote
 git clone https://github.com/salahawad/report.git
+cd report
+git remote set-url origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+```
+
+### 2. Install dependencies
+
+```bash
 cd report
 npm install
 ```
 
-## Getting started with the template
+### 3. Create `teams.json`
 
-A **test-team** is included as a reference. It contains a template page with:
+This file is gitignored (passwords stay local). Create it in the repo root:
 
-- All available UI components (cards, tables, badges)
-- CSS theme variables and color reference
-- Step-by-step instructions for creating your own report
-- Example file structure
+```json
+{
+  "your-team": {
+    "password": "your-secret-password",
+    "title": "Your Team Name"
+  }
+}
+```
 
-To view it locally:
+You can add as many teams as you need. Each team gets its own password.
+
+### 4. Add your team's HTML reports
+
+Create a folder under `teams/` with your team slug and add HTML files:
+
+```
+teams/your-team/
+  index.html          ← main report (will become full-report.html)
+  summary.html        ← optional additional pages
+  sprint-review.html  ← add as many as you want
+```
+
+A **test-team** template is included as a reference with all available UI components (cards, tables, badges, theme colors). To preview it:
 
 ```bash
+# First create a minimal teams.json if you haven't yet:
+echo '{"test-team":{"password":"test123","title":"Test Team"}}' > teams.json
+
 bash build.sh
 npx serve dist
 # Open http://localhost:3000/test-team/ → password: test123
 ```
 
-Use the template as a starting point — copy it to your team folder and replace the placeholder content.
+Copy the template to your team folder and replace the placeholder content.
 
-## Adding a new team
+### 5. Register your team on the landing page
 
-1. Create your team folder and add HTML report(s):
-   ```
-   teams/your-team/
-     index.html          ← main report
-     summary.html        ← optional additional pages
-   ```
+Edit the root `index.html` and add your team to the `teams` array:
 
-2. Add your team to `teams.json` (local only, never committed):
-   ```json
-   {
-     "your-team": {
-       "password": "your-password",
-       "title": "Your Team Name"
-     }
-   }
-   ```
+```js
+const teams = [
+  { slug: 'your-team', name: 'Your Team Name' },
+  // add more teams here
+];
+```
 
-3. Add your team to the links array in `index.html`:
-   ```js
-   { slug: 'your-team', name: 'Your Team Name' },
-   ```
+### 6. Build
 
-4. Build, commit, push:
-   ```bash
-   bash build.sh
-   git add dist/ index.html
-   git commit -m "Add your-team reports"
-   git push
-   ```
+```bash
+bash build.sh
+```
 
 The build script will automatically:
-- Generate an index page listing all reports in your team folder
-- Rename your `index.html` to `full-report.html` (so the generated index takes its place)
-- Encrypt every HTML file with your team's password
+- Encrypt every HTML file with the team's password (AES-256)
+- Generate an index page per team listing all available reports
+- Rename `index.html` → `full-report.html` (so the generated index takes its place)
+- Output everything to `dist/`
+
+### 7. Enable GitHub Pages
+
+Go to your repo on GitHub:
+
+**Settings → Pages → Source → GitHub Actions**
+
+### 8. Commit and deploy
+
+```bash
+git add dist/ index.html
+git commit -m "Add reports"
+git push
+```
+
+The GitHub Actions workflow will automatically deploy `dist/` to GitHub Pages. Your site will be live at:
+
+```
+https://YOUR_USERNAME.github.io/YOUR_REPO/
+```
+
+---
+
+## Adding more teams later
+
+1. Create `teams/new-team/*.html` with the report HTML
+2. Add the team to `teams.json` with a password
+3. Add the team to the `teams` array in root `index.html`
+4. Run `bash build.sh`
+5. Commit `dist/` and `index.html`, then push
 
 ## Multiple pages per team
 
-You can add as many HTML files as you want to a team folder. The build script picks up all `*.html` files and encrypts each one. A team index page is auto-generated listing all reports.
+Add as many HTML files as you want to a team folder. The build script encrypts each one and auto-generates a team index page listing all reports.
 
 ```
 teams/your-team/
@@ -110,16 +151,30 @@ teams/your-team/
   sprint-review.html    → stays sprint-review.html
 ```
 
-All pages share the same team password.
+All pages within a team share the same password. Enter it once and "Remember me" handles the rest.
+
+## File structure
+
+```
+dist/                       ← encrypted output (committed, deployed to GitHub Pages)
+  index.html                ← public landing page (team selector, not encrypted)
+  <team-slug>/
+    index.html              ← auto-generated report listing (encrypted)
+    full-report.html        ← main report (encrypted)
+    *.html                  ← additional pages (encrypted)
+teams/                      ← raw reports (local only, gitignored)
+  <team-slug>/*.html
+teams.json                  ← team names + passwords (local only, gitignored)
+build.sh                    ← encrypts team pages → dist/
+custom_template.html        ← password prompt template (customizable)
+.github/workflows/deploy.yml ← GitHub Actions deployment workflow
+```
 
 ## Security
 
 - **Raw reports** (`teams/`) and **passwords** (`teams.json`) are gitignored — they never leave your machine
 - Only **encrypted HTML** is committed and deployed
 - The encrypted pages contain zero readable content — just an AES-256 encrypted payload
-- Even page titles are hidden (shows "Protected Report")
-- The "Remember me" checkbox saves a salted hash in localStorage for 30 days
-
-## How encryption works
-
-StatiCrypt encrypts the entire HTML content with AES-256 using the team's password. The deployed page contains only a password prompt and the encrypted payload. Decryption happens entirely client-side in the browser — no server, no backend, no cookies.
+- Page titles are hidden (shows "Protected Report")
+- Decryption happens entirely client-side — no server, no backend, no cookies
+- "Remember me" saves a salted hash in localStorage for 30 days

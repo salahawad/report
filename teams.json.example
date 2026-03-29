@@ -1,0 +1,10 @@
+{
+  "your-team-slug": {
+    "password": "your-secret-password",
+    "title": "Your Team Display Name"
+  },
+  "another-team": {
+    "password": "another-password",
+    "title": "Another Team"
+  }
+}
