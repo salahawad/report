@@ -1,0 +1,16 @@
+{
+  "name": "report",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "bash build.sh",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "staticrypt": "^3.5.4"
+  }
+}
