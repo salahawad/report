@@ -118,7 +118,7 @@ hr{border:none;border-top:1px solid var(--border);margin:44px 0}
   <div class="features">
     <div class="feat">
       <div class="feat-lbl">Encryption</div>
-      <div class="feat-val">AES-256 via StatiCrypt</div>
+      <div class="feat-val">AES-256 + 600K PBKDF2</div>
     </div>
     <div class="feat">
       <div class="feat-lbl">Hosting</div>
@@ -134,11 +134,19 @@ hr{border:none;border-top:1px solid var(--border);margin:44px 0}
     </div>
     <div class="feat">
       <div class="feat-lbl">Per Team</div>
-      <div class="feat-val">Separate passwords</div>
+      <div class="feat-val">Unique salt + password</div>
     </div>
     <div class="feat">
       <div class="feat-lbl">Remember Me</div>
       <div class="feat-val">30-day auto-login</div>
+    </div>
+    <div class="feat">
+      <div class="feat-lbl">Password Check</div>
+      <div class="feat-val">Strength warnings on build</div>
+    </div>
+    <div class="feat">
+      <div class="feat-lbl">Dependencies</div>
+      <div class="feat-val">Dependabot auto-updates</div>
     </div>
   </div>
 </section>
@@ -175,7 +183,8 @@ hr{border:none;border-top:1px solid var(--border);margin:44px 0}
 <section>
   <div class="st">Security</div>
   <div class="ss">What gets published and what stays private</div>
-  <p>Raw HTML reports and passwords <span class="highlight">never leave your machine</span>. They are gitignored and excluded from the repo. Only the AES-256 encrypted output is committed and deployed. The encrypted pages contain zero readable content — not even the page title is exposed. Decryption happens entirely in the browser using the Web Crypto API.</p>
+  <p>Raw HTML reports and passwords <span class="highlight">never leave your machine</span>. They are gitignored and excluded from the repo. Only the AES-256 encrypted output is committed and deployed. The encrypted pages contain zero readable content — not even the page title is exposed.</p>
+  <p>Each team gets a <span class="highlight">unique cryptographic salt</span>, so even if two teams use the same password their encryption keys are different. Passwords are hashed through <span class="highlight">600,000 PBKDF2 iterations</span> to resist brute-force attacks. The build script warns about weak passwords. Decryption happens entirely in the browser using the Web Crypto API — nothing is sent to any server.</p>
 </section>
 
 <!-- CTA -->

@@ -2,6 +2,8 @@
 
 Password-protected HTML reports published via GitHub Pages. Each team gets their own folder with AES-256 encrypted pages — without the correct password, the content is unreadable even though the repo is public.
 
+AI agents are generating rich HTML reports every day — dashboards, analyses, sprint reviews, audits. This repo gives you a simple way to share them securely with your team. No backend, no accounts, no database. Just a password and a link.
+
 Built with [StatiCrypt](https://github.com/robinmoisson/staticrypt).
 
 ---
@@ -106,8 +108,10 @@ bash build.sh
 
 The build script will automatically:
 - Encrypt every HTML file with the team's password (AES-256)
+- Generate a unique cryptographic salt per team
 - Generate an index page per team listing all available reports
 - Rename `index.html` → `full-report.html` (so the generated index takes its place)
+- Warn if passwords are weak (not enforced, advisory only)
 - Output everything to `dist/`
 
 ### 7. Enable GitHub Pages
@@ -156,25 +160,33 @@ All pages within a team share the same password. Enter it once and "Remember me"
 ## File structure
 
 ```
-dist/                       ← encrypted output (committed, deployed to GitHub Pages)
-  index.html                ← public landing page (team selector, not encrypted)
+dist/                        ← encrypted output (committed, deployed to GitHub Pages)
+  index.html                 ← public landing page (team selector, not encrypted)
   <team-slug>/
-    index.html              ← auto-generated report listing (encrypted)
-    full-report.html        ← main report (encrypted)
-    *.html                  ← additional pages (encrypted)
-teams/                      ← raw reports (local only, gitignored)
+    index.html               ← auto-generated report listing (encrypted)
+    full-report.html         ← main report (encrypted)
+    *.html                   ← additional pages (encrypted)
+teams/                       ← raw reports (local only, gitignored)
   <team-slug>/*.html
-teams.json                  ← team names + passwords (local only, gitignored)
-build.sh                    ← encrypts team pages → dist/
-custom_template.html        ← password prompt template (customizable)
+teams.json                   ← team names + passwords (local only, gitignored)
+teams.json.example           ← example config for reference
+build.sh                     ← encrypts team pages → dist/
+custom_template.html         ← password prompt template (customizable)
+SECURITY.md                  ← security policy and disclosure process
 .github/workflows/deploy.yml ← GitHub Actions deployment workflow
+.github/dependabot.yml       ← automated dependency updates
 ```
 
 ## Security
 
+- **AES-256 encryption** with 600,000 PBKDF2 iterations per password
+- **Unique salt per team** — prevents cross-team key reuse even if passwords match
 - **Raw reports** (`teams/`) and **passwords** (`teams.json`) are gitignored — they never leave your machine
-- Only **encrypted HTML** is committed and deployed
-- The encrypted pages contain zero readable content — just an AES-256 encrypted payload
-- Page titles are hidden (shows "Protected Report")
-- Decryption happens entirely client-side — no server, no backend, no cookies
-- "Remember me" saves a salted hash in localStorage for 30 days
+- Only **encrypted HTML** is committed and deployed — zero readable content
+- **Page titles are hidden** (shows "Protected Report")
+- **Client-side only** — no server, no backend, no cookies, no data sent anywhere
+- **Password strength warnings** during build (advisory, not enforced)
+- **Dependabot enabled** for automated dependency security updates
+- **Branch protection** on main — requires PR review before merge
+
+See [SECURITY.md](SECURITY.md) for the full security policy and vulnerability reporting.
