@@ -2,3 +2,4 @@ node_modules/
 teams/
 teams.json
 .staticrypt.json
+dist/hapster-dev/
