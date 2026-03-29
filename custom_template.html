@@ -132,6 +132,26 @@
                 display: none !important;
             }
 
+            .staticrypt-error {
+                margin-top: 12px;
+                padding: 10px 14px;
+                background: rgba(224, 80, 80, 0.12);
+                border: 1px solid rgba(224, 80, 80, 0.3);
+                border-radius: 4px;
+                color: #e05050;
+                font-size: 13px;
+                text-align: center;
+                animation: shake 0.4s ease-in-out;
+            }
+
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                20% { transform: translateX(-6px); }
+                40% { transform: translateX(6px); }
+                60% { transform: translateX(-4px); }
+                80% { transform: translateX(4px); }
+            }
+
             .staticrypt-spinner-container {
                 height: 100%;
                 display: flex;
@@ -213,6 +233,7 @@
                         </label>
 
                         <input type="submit" class="staticrypt-decrypt-button" value="/*[|template_button|]*/0" />
+                        <div id="staticrypt-error" class="staticrypt-error hidden"></div>
                     </form>
                 </div>
             </div>
@@ -304,10 +325,15 @@
                 const password = document.getElementById("staticrypt-password").value,
                     isRememberChecked = document.getElementById("staticrypt-remember").checked;
 
+                const errorEl = document.getElementById("staticrypt-error");
+                errorEl.classList.add("hidden");
+
                 const { isSuccessful } = await staticrypt.handleDecryptionOfPage(password, isRememberChecked);
 
                 if (!isSuccessful) {
-                    alert(templateError);
+                    errorEl.textContent = templateError;
+                    errorEl.classList.remove("hidden");
+                    document.getElementById("staticrypt-password").select();
                 }
             });
         </script>

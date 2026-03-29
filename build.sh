@@ -11,9 +11,12 @@ STATICRYPT="$SCRIPT_DIR/node_modules/.bin/staticrypt"
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR"
 
-# Copy landing page
+# Copy landing page and 404
 if [ -f "$SCRIPT_DIR/index.html" ]; then
   cp "$SCRIPT_DIR/index.html" "$DIST_DIR/index.html"
+fi
+if [ -f "$SCRIPT_DIR/404.html" ]; then
+  cp "$SCRIPT_DIR/404.html" "$DIST_DIR/404.html"
 fi
 
 # Read each team from config and encrypt their pages
