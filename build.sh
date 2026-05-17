@@ -52,14 +52,14 @@ for team in $(jq -r 'keys[]' "$CONFIG"); do
     filename=$(basename "$html_file")
     [ "$filename" = "index.html" ] && continue
     # Extract <title> from the file for display name
-    page_title=$(grep -oP '(?<=<title>).*?(?=</title>)' "$html_file" | head -1)
+    page_title=$(grep -oP '(?<=<title)[^>]*>\K[^<]*' "$html_file" | head -1 || true)
     [ -z "$page_title" ] && page_title="$filename"
     report_links="$report_links<a class=\"rpt\" href=\"$filename\"><span class=\"rpt-name\">$page_title</span><span class=\"arrow\">&rarr;</span></a>"
   done
 
   # Also add the original index.html as "Full Report" if it exists
   if [ -f "$team_src/index.html" ]; then
-    page_title=$(grep -oP '(?<=<title>).*?(?=</title>)' "$team_src/index.html" | head -1)
+    page_title=$(grep -oP '(?<=<title)[^>]*>\K[^<]*' "$team_src/index.html" | head -1 || true)
     [ -z "$page_title" ] && page_title="Full Report"
     report_links="$report_links<a class=\"rpt\" href=\"full-report.html\"><span class=\"rpt-name\">$page_title</span><span class=\"arrow\">&rarr;</span></a>"
     # Rename index.html to full-report.html so the generated index takes its place
